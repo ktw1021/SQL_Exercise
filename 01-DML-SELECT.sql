@@ -123,10 +123,56 @@ CREATE TABLE Students (
     -- %: 0개 이상의 정해지지 않은 문자열
     -- _: 1개의 정해지지 않은 문자
     -- 이름에 am을 포함하고 있는 사원의 이름과 급여를 출력
-    SELECT first_name 이름, salary 급여 FROM Employees WHERE LOWER (first_name) LIKE '%am%';
+    SELECT first_name 이름, salary 급여 
+    FROM Employees 
+    WHERE LOWER (first_name) 
+    LIKE '%am%';
     -- 이름의 두 번째 글자가 a인 사원의 이름과 급여
-    SELECT first_name 이름, salary 급여 FROM Employees WHERE LOWER (first_name) LIKE '_a%';
+    SELECT first_name 이름, salary 급여 
+    FROM Employees 
+    WHERE LOWER (first_name) 
+    LIKE '_a%';
     -- 이름의 네 번째 글자가 a인 사원의 이름과 급여
-    SELECT first_name 이름, salary 급여 FROM Employees WHERE LOWER (first_name) LIKE '___a%';
+    SELECT first_name 이름, salary 급여 
+    FROM Employees 
+    WHERE LOWER (first_name) 
+    LIKE '___a%';
     -- 이름이 네 글자인 사원들 중에서 두 번째 글자가 a인 사원의 이름과 급여
-    SELECT first_name 이름, salary 급여 FROM Employees WHERE LOWER (first_name) LIKE '_a__';
+    SELECT first_name 이름, salary 급여 
+    FROM Employees 
+    WHERE LOWER (first_name) 
+    LIKE '_a__';
+    -- 부서 ID가 90인 사원 중 급여가 20,000 이상인 사원의 이름
+    SELECT first_name 이름, salary 급여, department_id "부서 아이디" 
+    FROM Employees 
+    WHERE salary >= 20000 
+    AND department_id = 90;
+    -- 입사일이 01/01/01 ~ 07/12/31 구간에 있는 사원의 목록
+    SELECT first_name 이름, hire_date 입사일 
+    FROM Employees 
+    WHERE hire_date 
+    BETWEEN '11/01/01' AND '17/12/31';
+    -- manager_id가 100, 120, 147인 사원의 명단
+    SELECT first_name 이름, manager_id 관리자 
+    FROM Employees 
+    WHERE manager_id 
+    IN (100, 120, 147);
+    
+    --------------
+    ---ORDER BY---
+    --------------
+    -- 특정 컬럼명, 연산식, 별칭, 컬럼 순서를 기준으로 레코드를 정렬
+    -- ASC(오름차순): default, DESC(내림차순)
+    -- 여러 개의 컬럼에 적용할 수 있고 .로 구분
+    
+    -- 부서 번호의 오름차순으로 정렬, 부서번호, 급여, 이름 출력
+    SELECT department_id 부서번호, salary 급여, first_name 이름 
+    FROM Employees 
+    ORDER BY department_id ASC;
+    -- 급여가 10,000 이상인 직원 대상, 급여의 내림차순으로, 이름, 급여 출력
+    SELECT first_name 이름, salary 급여 FROM Employees ORDER BY salary DESC;
+    -- 부서 번호, 급여, 이름 순으로 출력, 정렬 기준 부서번호 오름차순, 급여 내림차순
+    SELECT department_id "부서 번호", salary 급여, first_name 이름 FROM Employees ORDER BY department_id ASC, salary DESC;
+    -- 정렬 기준을 어떻게 세우느냐에 따라 성능, 출력 결과에 영향을 미칠 수 있다. 
+    
+    
