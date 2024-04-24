@@ -57,3 +57,8 @@ CREATE TABLE Students (
     SELECT * FROM Employees;
     DESC Employees;
     
+    -- ex)01: 사원의 이름(first_name)과 전화번호, 입사일, 급여 출력
+    SELECT first_name, phone_number, hire_date, salary FROM Employees;
+    -- ex)02: 사원의 이름(first_name)과 성(last_name), 급여, 전화번호, 입사일 출력
+    SELECT first_name, last_name, salary, phone_number, hire_date FROM Employees;
+    SELECT 12 FROM dual;
