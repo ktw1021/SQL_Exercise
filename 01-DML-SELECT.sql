@@ -290,3 +290,58 @@ CREATE TABLE Students (
     SELECT '2012-09-24 13:48:00',
         TO_DATE('2012-09-24 13:48:00', 'YYYY-MM-DD HH24:MI:SS')
         FROM dual;
+        
+    -- 날짜 연산
+    -- Date +/- Number : 특정 일수를 더하거나 뺄 수 있다. 
+    SELECT sysdate, 
+    sysdate - 16
+    FROM dual;
+    -- Date - Date : 두 날짜의 경과일수
+    SELECT sysdate,
+    TO_DATE('24/04/25') - TO_DATE('20240424')
+    FROM dual;
+    -- Date + Number / 24: 특정 시간이 지난 후의 날짜
+    SELECT sysdate,
+    sysdate + 48/24 -- 48시간이 지난 후의 날짜
+    FROM dual;
+    
+    -- NVL2 function
+    SELECT first_name, 
+            salary, 
+            NVL2(commission_pct,'O','X') "commission(O,X)", 
+            NVL2(salary+salary*commission_pct,salary+salary*commission_pct,salary) "최종 급여" 
+    FROM Employees;
+    
+    -- CASE function
+    -- 보너스를 지급하기로 함. 
+    -- AD 관련 직종에게는 20%, SA 관련 직원에게는 10%, IT 관련 직원들에게는 8%, 나머지에게는 5%
+    SELECT first_name, job_id, salary,
+        SUBSTR(job_id,1,2) 직종,
+        CASE SUBSTR(job_id,1,2) WHEN 'AD' THEN salary*0.2
+                                WHEN 'SA' THEN salary*0.1
+                                WHEN 'IT' THEN salary*0.08
+                                ELSE salary*0.05
+                            END 보너스
+    FROM Employees;
+    
+    -- DECODE 함수
+    SELECT first_name, job_id, salary,
+        SUBSTR(job_id, 1, 2) 직종,
+        DECODE(SUBSTR(1,2),     -- 비교할 값
+                    'AD', salary * 0.2,
+                    'SA', salary * 0.1,
+                    'IT', salary * 0.08,
+                    salary * 0.05) bonus
+    FROM Employees;
+    
+    --[연습] hr.employees
+    SELECT first_name 이름, department_id 부서ID, 
+    CASE WHEN department_id >= 10 AND department_id <= 30 THEN 'A-GROUP'
+         WHEN department_id >= 40 AND department_id <= 50 THEN 'B-GROUP'
+         WHEN department_id >= 60 AND department_id <= 100 THEN 'C-GROUP'
+         ELSE 'REMAINDER'
+         END 팀
+    FROM Employees
+    ORDER BY department_id ASC;
+    
+   
