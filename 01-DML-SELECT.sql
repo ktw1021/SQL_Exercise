@@ -175,4 +175,118 @@ CREATE TABLE Students (
     SELECT department_id "부서 번호", salary 급여, first_name 이름 FROM Employees ORDER BY department_id ASC, salary DESC;
     -- 정렬 기준을 어떻게 세우느냐에 따라 성능, 출력 결과에 영향을 미칠 수 있다. 
     
+    --------------
+    --단일행 함수--
+    --------------
+    -- 단일 레코드를 기준으로 특정 컬럼에 값에 적용되는 함수
+    -- 문자열 단일행 함수
+    SELECT first_name, last_name, 
+        CONCAT(first_name, CONCAT(' ', last_name)), -- answkduf dusruf gkatn
+        first_name || ' ' || last_name
+    FROM Employees;
     
+    SELECT first_name, last_name, 
+        LOWER(first_name),  -- 모두 소문자
+        UPPER(first_name),   -- 모두 대문자
+        LPAD(first_name, 20, '*'),  -- 왼쪽에 20자리 *을 추가
+        RPAD(first_name, 20, '*')   -- 오른쪽에 20자리 *을 추가
+    FROM Employees;
+        
+    SELECT '    Oracle  ',
+        '*****Database*****',
+        LTRIM(' Oracle  '), -- 왼쪽의 빈 공간 삭제
+        RTRIM(' Oracle  '), --오른쪽의 빈 공간 삭제
+        TRIM('*' FROM '*****Database*****'),    --앞뒤의 잡음 문자 제거
+        SUBSTR('Oracle Database', 8, 4), -- 8번째 글자부터 4개 글자 추출
+        SUBSTR('Oracle Database', -8, 4),    -- 역인덱스 이용 부분 문자열
+        LENGTH('Oracle Database')   -- 문자열 길이
+        FROM dual;
+        
+    -- 수치형 단일행 함수
+    
+    SELECT 3.14159,
+        ABS(-3.14),     --절대값
+        CEIL(3.14),     --올림
+        FLOOR(3.14),    --내림
+        ROUND(3.14),    --반올림
+        ROUND(3.14159, 3),   -- 소수점 3번째 자리 반올림(4번째에서 반올림함)
+        TRUNC(3.5), -- 버림
+        TRUNC(3.14159, 3),   -- 소수점 4번째 자리에서 버림
+        SIGN(-3.14159),     -- 부호(-1: 음수, 0: 0, 1: 양수)
+        MOD (7,3),      -- 7을 3으로 나눈 나머지
+        POWER(2,4)      -- 2의 4승
+    FROM dual;
+    
+    ---------------
+    --DATE FORMAT--
+    ---------------
+    -- 현재 세션 정보 확인
+    SELECT * FROM nls_session_parameters;
+    -- 현재 날짜 포맷이 어떻게 되는가?
+    -- 딕셔너리를 확인
+    SELECT value FROM nls_session_parameters
+    WHERE parameter='NLS_DATE_FORMAT';
+    
+    -- 현재 날짜: SYSDATE
+    -- 가상 테이블 dual로부터 받아오므로 1개의 레코드
+    SELECT sysdate FROM dual;
+    -- Employees 테이블로부터 받아오므로 Employees 테이블 레코드의 갯수만큼
+    SELECT first_name, hire_date, sysdate FROM Employees;
+    
+    -- 날짜 관련 단일행 함수
+    SELECT sysdate,
+    --2개월이 지난 후의 날짜
+    ADD_MONTHS(sysdate, 2), 
+    --현재 달의 마지막 날
+    LAST_DAY(sysdate),
+    --두 날짜 사이의 개월 차
+    MONTHs_BETWEEN(sysdate,'12/09/24'),
+    --해당 날짜 이후 처음 오는 요일(일월화 순으로 숫자 입력)
+    NEXT_DAY(sysdate,6),
+    --MONTH를 기준으로 반올림
+    ROUND(sysdate, 'MONTH'),
+    --MONTH를 기준으로 내림
+    TRUNC(sysdate, 'MONTH')
+    FROM dual;
+    
+    SELECT first_name, hire_date,
+        ROUND(MONTHS_BETWEEN(sysdate, hire_date),1) 근속월수
+    FROM Employees;
+    
+    ------------
+    --변환함수---
+    ------------
+    -- TO_NUMBER(s, fmt) : 문자열 -> 숫자
+    -- TO_DATE(s, fmt): 문자열 -> 날짜
+    -- TO_CHAR(o, fmt) : 숫자, 날짜 -> 문자열
+    
+    -- TO_CHAR
+    SELECT first_name, 
+        TO_CHAR(hire_date, 'YYYY-MM-DD HH24:MI:SS')
+    FROM Employees;
+    
+    -- 현재 시간을 년-월-일-시-분-초
+    SELECT sysdate,
+        TO_CHAR(sysdate, 'YYYY-MM-DD HH24:MI:SS')
+    FROM dual;
+    
+    SELECT
+        TO_CHAR(3000000, 'L999,999,999,999.99')
+    FROM dual;
+    
+    --모든 직원의 이름과 연봉 정보를 표시
+    SELECT
+        first_name 이름, salary 월급, NVL(commission_pct,0) 커미션, 
+        TO_CHAR((salary + salary * NVL(commission_pct, 0))*12, '$999,999,999.99') 연봉
+    FROM Employees
+    ORDER BY salary ASC;
+    
+    --문자 -> 숫자: TO_NUMBER
+    SELECT '$57, 600',
+        TO_NUMBER('$57,600','$999,999.99')/12 월급
+    FROM dual;
+    
+    --문자열 -> 날짜
+    SELECT '2012-09-24 13:48:00',
+        TO_DATE('2012-09-24 13:48:00', 'YYYY-MM-DD HH24:MI:SS')
+        FROM dual;
