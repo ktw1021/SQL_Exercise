@@ -344,4 +344,15 @@ CREATE TABLE Students (
     FROM Employees
     ORDER BY department_id ASC;
     
+   --1. 계정과 스키마(데이터베이스)의 관계
+   -- - MYSQL, PostgreSQL 등: 계정과 스키마가 분리
+   -- - Oracle 등: 계정과 스키마를 동일시
+   --           = 계정을 생성하면 스키마가 사용자 테이블스페이스에 생성된다. 
+   --2. 호출 방식
+   -- "스키마명"."데이터베이스객체명"."속성명"
+   SELECT HR.Employees.job_id,
+          HR.Employees.first_name,
+          HR.Employees.last_name
+   FROM HR.Employees;
+   
    
