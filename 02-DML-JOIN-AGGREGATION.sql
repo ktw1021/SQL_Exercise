@@ -195,6 +195,11 @@ SELECT department_id,
     GROUP BY department_id
     ORDER BY department_id ASC;
     
+    SELECT department_id 부서명, COUNT(*) 인원수, SUM(salary) "급여 합계"
+        FROM Employees
+        GROUP BY department_id
+        HAVING SUM(salary) > 20000;
+        
 -- 집계 함수 이후의 조건 비교 HAVING 절을 이용
 SELECT department_id,
        ROUND(AVG(salary))
@@ -267,3 +272,142 @@ AND salary > (
         )
     ORDER BY hire_date ASC,
              salary DESC;
+             
+-- 연습문제) SCOTT보다 급여가 많은 사람의 이름은?
+SELECT first_name, salary
+FROM Employees
+WHERE salary > (
+SELECT salary 
+FROM Employees
+WHERE first_name = 'Trenna'
+)
+ORDER BY salary ASC;
+
+-- 다중형 서브쿼리
+-- 서브쿼리 결과가 둘 이상의 레코드일 때, 단일행 비교연산자는 사용 X
+-- 집합연산에 관련된 IN, ANY, ALL, EXIST 등을 사용해야 한다
+--[연습] 직원들 중, 110번 부서 사람들이 받는 급여와 같은 급여를 받는 직원들의 목록
+SELECT first_name, salary
+    FROM Employees
+WHERE salary IN (
+        SELECT salary 
+        FROM Employees
+        WHERE department_id = 110)
+    ORDER BY salary DESC;
+        
+-- Correlated Querry : 연관 쿼리
+-- 바깥쪽 쿼리(Outer Querry)와 안쪽 쿼리(Inner Querry)가 서로 연관된 쿼리
+SELECT
+    first_name,
+    salary,
+    department_id
+FROM Employees OUTER
+WHERE salary > (SELECT AVG(salary)
+                FROM Employees
+                WHERE department_id = OUTER.department_id);
+-- 외부 쿼리: 급여를 특정 값보다 많이 받는 직원의 이름, 급여, 부서ID
+
+-- 내부 쿼리: 특정 부서에 소속된 직원의 평균 급여
+
+-- 자신이 속한 부서의 평균 급여보다 많이 받는 직원의 목록을 구하라는 의미
+-- 외부 쿼리가 내부 쿼리에 영향을 미치고, 내부 쿼리 결과가 다시 외부 쿼리에 영향을 미침
+-- 내부 쿼리 결과가 다사ㅣ 외부 쿼리에 영향을 미침
+
+-- 서브쿼리 연습
+-- 각 부서별로 최고 급여를 받는 사원의 목록(조건절에서 서브쿼리 활용)
+SELECT d.department_name 부서명, 
+       e.first_name || ' ' || e.last_name 사원명, 
+       e.salary 최고급여
+    FROM Employees e
+    JOIN Departments d ON e.department_id = d.department_id
+        WHERE e.salary = (
+        SELECT MAX(salary)
+        FROM Employees
+        WHERE department_id=e.department_id
+        )
+    ORDER BY salary DESC;
+    
+    SELECT e.job_id 업무ID,
+           e.salary 평균급여
+        FROM Employees e
+        WHERE e.salary = (
+        SELECT AVG(salary)
+            FROM Employees
+            WHERE job_id=e.job_id
+            );
+    
+-- TOP-K 쿼리
+-- 질의의 결과로 부여된 가상 컬럼 rownum 값을 사용해서 쿼리 순서 반환
+-- rownum 값을 활용 상위 k개의 값을 얻어오는 쿼리
+
+-- 2017년 입사자 중에서 연봉 순위 5위까지 출력
+
+-- 1. 2017년 입사자는 누구?
+SELECT * FROM Employees
+WHERE hire_date Like '17%'
+AND rownum < 6
+ORDER BY salary DESC;
+
+SELECT first_name,
+       hire_date,
+       salary
+    FROM (
+           SELECT *
+           FROM Employees
+           WHERE hire_date Like '17%'
+           AND rownum < 6
+           ORDER BY salary ASC
+            );
+    
+-- 집합 연산
+SELECT first_name, salary, hire_date FROM Employees WHERE hire_date < '15/01/01';
+SELECT first_name, salary, hire_date FROM Employees WHERE salary > 12000;
+
+-- 합집합(중복 미포함)
+SELECT first_name, salary, hire_date FROM Employees WHERE hire_date < '15/01/01'
+UNION 
+SELECT first_name, salary, hire_date FROM Employees WHERE salary > 12000;
+
+-- 중복 레코드는 별개로 취급(중복 포함)
+SELECT first_name, salary, hire_date FROM Employees WHERE hire_date < '15/01/01'
+UNION ALL 
+SELECT first_name, salary, hire_date FROM Employees WHERE salary > 12000;
+
+-- 교집합
+SELECT first_name, salary, hire_date FROM Employees WHERE hire_date < '15/01/01'
+INTERSECT --> INNER JOIN과 같은 결과
+SELECT first_name, salary, hire_date FROM Employees WHERE salary > 12000;
+
+-- 차집합
+SELECT first_name, salary, hire_date FROM Employees WHERE hire_date < '15/01/01'
+MINUS --
+SELECT first_name, salary, hire_date FROM Employees WHERE salary > 12000;
+
+--RANK 관련 함수
+SELECT salary, first_name, 
+        RANK() OVER (ORDER BY salary DESC) as rank, -- 일반적인 순위
+        DENSE_RANK() OVER (ORDER BY salary DESC) as dense_rank, -- 
+        ROW_NUMBER() OVER (ORDER BY salary DESC) as row_number, -- 정렬했을 때의 실제 행번호
+        rownum AS "rownum"
+        FROM Employees;
+        
+-- Hierarchial Query
+-- 트리 형태 구조 표현
+-- level 가상 컬럼 활용 쿼리
+SELECT level, first_name
+FROM Employees
+START WITH manager_id IS NULL -- 트리 형태의 root가 되는 조건 명시
+CONNECT BY PRIOR employee_id = manager_id -- 상위 레벨과의 연결 조건 (가지치기 조건)
+ORDER BY level; -- 트리의 길이를 나타나는 Oracle 가상 컬럼
+    
+-- 자체문제: 'Marketing' 부서에서 급여가 높은 순으로 5명의 사원 추리기
+SELECT e.first_name || ' ' || e.last_name,
+       d.department_name,
+       e.salary,
+       e.hire_date
+    FROM Employees e
+        JOIN Departments d ON e.department_id=d.department_id
+        WHERE d.department_name = 'Marketing'
+        ORDER BY e.salary DESC;
+               
+        
