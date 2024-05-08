@@ -158,3 +158,17 @@ CREATE SEQUENCE seq_book_id
     MAXVALUE 1000000
     NOCACHE;
     
+    
+    
+DESC book;
+
+SELECT * FROM author;
+
+SELECT * FROM user_objects WHERE OBJECT_TYPE = 'SEQUENCE';
+DELETE FROM author;
+ROLLBACK;
+COMMIT;
+
+SELECT last_name || ' ' || first_name AS full_name, email, phone_number, hire_date
+FROM Employees;
+
