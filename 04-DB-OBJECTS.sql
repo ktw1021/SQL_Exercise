@@ -172,3 +172,19 @@ COMMIT;
 SELECT last_name || ' ' || first_name AS full_name, email, phone_number, hire_date
 FROM Employees;
 
+
+--mini_project
+CREATE TABLE Phone_Book (
+        ph_id       NUMBER(10) PRIMARY KEY,
+        ph_name     VARCHAR2(10),
+        ph_num      VARCHAR2(20),
+        hm_num      VARCHAR2(20)
+    );
+    CREATE SEQUENCE seq_phone_book;
+COMMIT;
+INSERT INTO Phone_Book (ph_id, ph_name, ph_num, hm_num) VALUES (1,'고길동','010-1234-5678','02-421-3456');
+SELECT * FROM Phone_Book;
+CREATE SEQUENCE ph_id_seq
+    START WITH MAX(ph_id)+1
+    INCREMENT BY 1
+    NOMAXVALUE;
